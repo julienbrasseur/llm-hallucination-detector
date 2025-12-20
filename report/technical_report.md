@@ -4,6 +4,8 @@
 
 **Abstract. —** This report summarizes a series of experiments investigating whether hallucination-related signals can be extracted from an LLM's internal representations. Using `Ministral-8B-Instruct-2410` as a case study, we constructed a dataset of 145,169 labeled examples spanning diverse domains and trained lightweight XGBoost probes on mean-pooled hidden states and attention features. Results indicate that hallucination-relevant information is indeed encoded in the model's activations, achieving approximately 83% accuracy, 91% AUC, and 75% F1 score. Notably, this signal is concentrated in specific mid-layers rather than distributed across the network, with layer 16 (of 36) proving most informative. Multi-layer concatenation and attention-based features yielded no substantial improvement over the single best-performing layer.
 
+*The full experimental pipeline is documented in a series of [four notebooks](../notebooks).*
+
 ---
 
 ## 1. Introduction
@@ -153,6 +155,7 @@ This study demonstrates that hallucination-related signals are present and extra
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
