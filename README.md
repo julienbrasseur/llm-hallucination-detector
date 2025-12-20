@@ -14,7 +14,7 @@ This repository comes with a series of four notebooks illustrating the use of `l
 - [`03_Train_on_multiple_activations.ipynb`](./notebooks/03_Train_on_multiple_activations.ipynb): This notebook is analogous to the previous one, but focuses on the case of probe training on multiple activation layers with feature selection.
 - [`04_Train_on_attention_layer.ipynb`](./notebooks/04_Train_on_attention_layer.ipynb): Illustrates attention extraction using `AttentionExtractor`, which captures two types of features: multi-head attention outputs and statistical summaries (12 metrics computed per head, including entropy, Gini coefficient, standard deviation, and more experimental measures like Frobenius norm). As in the previous notebooks, these features are used to train XGBoost probes. This final notebook also includes a conclusion summarizing lessons learned across all experiments.
 
-The dataset used throughout these four notebooks is [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset).
+The dataset used throughout these four notebooks is [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset). All experiments use [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410). See the [technical report](./report/technical_report.md) for a detailed summary of findings.
 
 ---
 
