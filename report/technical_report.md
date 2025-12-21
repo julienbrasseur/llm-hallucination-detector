@@ -10,6 +10,8 @@
 
 ## 1. Introduction
 
+Large language models occasionally generate plausible-sounding but factually incorrect content, a phenomenon commonly referred to as "hallucination". Current detection methods typically rely on external knowledge retrieval, self-consistency checks, or secondary judge models, each incurring significant computational overhead or introducing additional points of failure.
+
 The hypothesis motivating this work is that language models may encode information about the reliability of their own outputs within their internal representations. If such signals exist and can be extracted, lightweight probes could enable real-time hallucination detection at minimal computational cost, without requiring external knowledge bases or additional inference passes.
 
 We focus on Mistral's [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410), a 36-layer transformer with 32 attention heads and a hidden dimension of 4096. This model was chosen for its moderate size, facilitating rapid experimentation and activation extraction on a single NVIDIA A100 GPU.
@@ -155,6 +157,7 @@ This study demonstrates that hallucination-related signals are present and extra
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
