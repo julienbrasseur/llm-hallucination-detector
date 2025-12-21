@@ -150,13 +150,14 @@ A reasonable next step for improving absolute performance could be dataset refin
 
 ## 6. Conclusion
 
-This study demonstrates that hallucination-related signals are present and extractable from transformer internal representations using lightweight classical probes. A single mid-layer's mean-pooled activations suffice to achieve 91% AUC and 75% F1 score, suggesting that the model encodes, at least implicitly, information about the reliability of its own outputs. While the observed performance ceiling leaves room for improvement, these findings provide a foundation for real-time, low-overhead hallucination detection and offer interpretability insights into how factual grounding may be represented within language models.
+This study demonstrates that hallucination-related signals are present and extractable from transformer internal representations using lightweight classical probes. A single mid-layer's mean-pooled activations suffice to achieve 83% accuracy, 91% AUC and 75% F1 score, suggesting that the model encodes, at least implicitly, information about the reliability of its own outputs. While the observed performance ceiling leaves room for improvement, these findings provide a foundation for real-time, low-overhead hallucination detection and offer interpretability insights into how factual grounding may be represented within language models.
 
 ## Resources
 
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
