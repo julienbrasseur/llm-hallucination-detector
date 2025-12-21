@@ -37,7 +37,7 @@ Two deliberate choices shaped the dataset construction:
 
 #### 3.1. Feature Extraction
 
-Activations were extracted using `llmscan`, a lightweight library developed for this research. For each example, the model processed the full conversation (user prompt and assistant response) formatted according to Mistral's chat template. Crucially, only tokens corresponding to the assistant's response (following the `[/INST]` delimiter) were retained for feature extraction, ensuring the probe operates on the model's representation of its own output where hallucinations manifest.
+Activations were extracted using `llmscan`, a lightweight library developed for this research. For each example, the model processed the full conversation (user prompt and assistant response) formatted according to Mistral's chat template. Crucially, only tokens corresponding to the assistant's response (following the `[/INST]` delimiter) were retained for feature extraction, ensuring the probe operates on the model's representation of its own output (where hallucinations manifest).
 
 Two types of features were extracted:
 
@@ -157,6 +157,7 @@ This study demonstrates that hallucination-related signals are present and extra
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
