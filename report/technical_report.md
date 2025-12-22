@@ -138,7 +138,7 @@ Finally, all configurations converge to similar performance bounds: approximatel
 
 Several factors may account for the observed performance ceiling:
 
-- *Pooling artifacts:* Mean-pooling may attenuate per-token signals. Retaining raw token-level activations and training a sequence-aware probe (e.g., a small transformer) could capture finer-grained patterns, though at the cost of the lightweight inference we sought to preserve.
+- *Pooling artifacts:* Mean-pooling may attenuate per-token signals, particularly for longer responses where averaging "dilutes" token-level information. (The non-negligible proportion of short assistant responses in the dataset, where pooling has less effect, may, in fact, partly contribute to the positive results observed.) Retaining raw token-level activations and training a sequence-aware probe (e.g., a small transformer) could capture finer-grained patterns, though at the cost of the lightweight inference we sought to preserve.
 
 - *Dataset quality:* Due to budget constraints, labels were assigned by judge LLMs without majority voting or human verification. While this enabled large-scale dataset construction, a non-negligible false positive/negative rate may impose an upper bound on achievable performance regardless of probe sophistication.
 
@@ -146,7 +146,7 @@ Several factors may account for the observed performance ceiling:
 
 Additional approaches explored but not detailed here - including alternative pooling strategies (max-pooling, attention-weighted pooling), alternative classifiers (random forests, logistic regression, neural probes), probe ensembling, and PCA dimensionality reduction - yielded no improvements. Mean-pooling with XGBoost consistently performed best.
 
-A reasonable next step for improving absolute performance could be dataset refinement: retraining probes on a curated subset with human-verified labels or robust majority voting could establish a cleaner signal and tighter performance bounds.
+Two directions could help clarify the source of the observed performance ceiling. First, dataset refinement through human-verified labels or robust majority voting would establish whether label noise is the limiting factor. Second, exploring sequence-aware probes that operate on raw token-level activations would test whether mean-pooling discards discriminative per-token signals. However, both directions involve significant tradeoffs: human annotation and majority voting multiply labeling costs, while retaining full activation sequences introduces substantial storage and computational overhead.
 
 ## 6. Conclusion
 
@@ -157,6 +157,7 @@ This study demonstrates that hallucination-related signals are present and extra
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
