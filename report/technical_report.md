@@ -142,7 +142,7 @@ Several factors may account for the observed performance ceiling:
 
 - *Dataset quality:* Due to budget constraints, labels were assigned by judge LLMs without majority voting or human verification. While this enabled large-scale dataset construction, a non-negligible false positive/negative rate may impose an upper bound on achievable performance regardless of probe sophistication.
 
-- *Fundamental limits:* The hallucination signal encoded in activations may be inherently partial or may not align perfectly with standard definitions of factual hallucination.
+- *Fundamental limits:* The hallucination signal encoded in activations may be inherently partial or may not align perfectly with standard definitions of factual hallucination. In particular, the probe might be detecting something akin to the model committing to an answer despite low internal confidence, rather than factual incorrectness *per se*. Such low-confidence commitments sometimes produce correct answers and sometimes incorrect ones, yet correctness-based hallucination labels treat these internally similar states differently. This mismatch could impose a fundamental ceiling on probe performance.
 
 Additional approaches explored but not detailed here - including alternative pooling strategies (max-pooling, attention-weighted pooling), alternative classifiers (random forests, logistic regression, neural probes), probe ensembling, and PCA dimensionality reduction - yielded no improvements. Mean-pooling with XGBoost consistently performed best.
 
@@ -157,6 +157,7 @@ This study demonstrates that hallucination-related signals are present and extra
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
