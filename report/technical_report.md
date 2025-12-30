@@ -54,7 +54,7 @@ Two types of features were extracted:
 
 #### 3.2. Probe Architecture
 
-All probes used XGBoost classifiers with consistent hyperparameters: 800 estimators, max depth 6, learning rate 0.05, 80% subsampling, and GPU-accelerated training. Early stopping (patience of 20 rounds) prevented overfitting. Decision thresholds were optimized on the validation set to maximize F1 score.
+All probes used XGBoost classifiers with consistent hyperparameters: 800 estimators, max depth 6, learning rate 0.05, 80% subsampling, and GPU-accelerated training. Early stopping (patience of 20 rounds) prevented overfitting. <!-- Decision thresholds were optimized on the validation set to maximize F1 score. -->
 
 #### 3.3. Experimental Protocol
 
@@ -77,7 +77,7 @@ The layer selection analysis revealed that mid-layers are most expressive for ha
 ![Figure 1: Layer-wise probe performance (F1 and accuracy) across all 36 layers of Ministral-8B-Instruct-2410.](../notebooks/layer_selection.png)
 *Figure 1: Layer-wise probe performance (F1 and accuracy) across all 36 layers of* `Ministral-8B-Instruct-2410`.
 
-This pattern admits an intuitive interpretation: early layers (1-10) encode primarily syntactic and surface-level features, while late layers (25–36) may be optimized for generation rather than factual grounding. Mid-layers appear to capture semantic representations where hallucination-relevant signals are most accessible.
+This pattern admits an intuitive interpretation: early layers (1-10) encode primarily syntactic and surface-level features, while late layers (25-36) may be optimized for generation rather than factual grounding. Mid-layers appear to capture semantic representations where hallucination-relevant signals are most accessible.
 
 #### 4.2. Single-Layer Results
 
@@ -157,6 +157,7 @@ This study demonstrates that hallucination-related signals are present and extra
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
 
 
 
