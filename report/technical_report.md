@@ -2,7 +2,7 @@
 
 ---
 
-**Abstract. —** This report summarizes a series of experiments investigating whether hallucination-related signals can be extracted from an LLM's internal representations. Using `Ministral-8B-Instruct-2410` as a case study, we constructed a dataset of 145,169 labeled examples spanning diverse domains and trained lightweight XGBoost probes on mean-pooled hidden states and attention features. Results indicate that hallucination-relevant information is indeed encoded in the model's activations, achieving approximately 83% accuracy, 91% AUC, and 75% F1 score. Notably, this signal is concentrated in specific mid-layers rather than distributed across the network, with layer 16 (of 36) proving most informative. Multi-layer concatenation and attention-based features yielded no substantial improvement over the single best-performing layer.
+**Abstract. —** This report summarizes a series of experiments replicating and extending prior work on extracting hallucination-related signals from an LLM's internal representations. Using `Ministral-8B-Instruct-2410` as a case study, we constructed a dataset of 145,169 labeled examples spanning diverse domains and trained lightweight XGBoost probes on mean-pooled hidden states and attention features. Results confirm that hallucination-relevant information is encoded in the model's activations, achieving approximately 84% accuracy, 91% AUC, and 75% F1 score. Notably, this signal is concentrated in specific mid-layers rather than distributed across the network, with layer 16 (of 36) proving most informative. Multi-layer concatenation and attention-based features yielded no substantial improvement over the single best-performing layer.
 
 *The full experimental pipeline is documented in a series of [four notebooks](../notebooks).*
 
@@ -12,7 +12,9 @@
 
 Large language models occasionally generate plausible-sounding but factually incorrect content, a phenomenon commonly referred to as "hallucination". Current detection methods typically rely on external knowledge retrieval, self-consistency checks, or secondary judge models, each incurring significant computational overhead or introducing additional points of failure.
 
-The hypothesis motivating this work is that language models may encode information about the reliability of their own outputs within their internal representations. If such signals exist and can be extracted, lightweight probes could enable real-time hallucination detection at minimal computational cost, without requiring external knowledge bases or additional inference passes.
+An alternative approach, explored in recent work, is to extract hallucination-related signals directly from the model's internal representations. Azaria & Mitchell (2023) demonstrated that classifiers trained on hidden states can detect statement truthfulness with 71-83% accuracy. Ji et al. (2024) extended this to pre-generation risk estimation, while other work has explored eigenvalue-based consistency metrics (Chen et al., 2024) and attention-based probing (Sriramanan et al., 2024).
+
+This study replicates and extends these findings using a different model, a larger dataset, and alternative methodological choices. Specifically, we use mean-pooled activations (rather than single-token extraction), XGBoost classifiers (rather than MLP probes), and a dataset of 145K examples spanning multiple domains.
 
 We focus on Mistral's [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410), a 36-layer transformer with 32 attention heads and a hidden dimension of 4096. This model was chosen for its moderate size, facilitating rapid experimentation and activation extraction on a single NVIDIA A100 GPU.
 
@@ -79,6 +81,8 @@ The layer selection analysis revealed that mid-layers are most expressive for ha
 
 This pattern admits an intuitive interpretation: early layers (1-10) encode primarily syntactic and surface-level features, while late layers (25-36) may be optimized for generation rather than factual grounding. Mid-layers appear to capture semantic representations where hallucination-relevant signals are most accessible.
 
+*Remark:* This mid-layer concentration aligns with Azaria & Mitchell (2023), who also found middle layers most predictive when probing true/false statements. Note, however, that Ji et al. (2024) reported deeper layers as optimal when probing queries to predict hallucination risk before generation. This discrepancy may reflect a genuine difference between pre-generation uncertainty signals (encoded in query representations) and post-generation reliability signals (encoded in response representations).
+
 #### 4.2. Single-Layer Results
 
 Training on layer 16 alone yielded the following results:
@@ -88,7 +92,7 @@ Training on layer 16 alone yielded the following results:
 | 0.5 (default) | 84.15% | 81.94% | 65.09% | 72.55% | 91.04% |
 | 0.366 (optimized) | 82.96% | 72.49% | 75.87% | 74.13% | 91.04% |
 
-Threshold optimization improves hallucination recall from 65% to 76% at modest cost to precision, which is a reasonable tradeoff given that missing hallucinations is typically more costly than occasional false positives. In any event, this already establishes that hidden states encode, at least partially, hallucination-related signals.
+Threshold optimization improves hallucination recall from 65% to 76% at modest cost to precision, which is a reasonable tradeoff given that missing hallucinations is typically more costly than occasional false positives. In any event, this confirms that hidden states encode, at least partially, hallucination-related signals.
 
 #### 4.3. Multi-Layer Results
 
@@ -125,13 +129,13 @@ Hybrid approaches combining activations with attention features showed no improv
 
 #### 5.1. Key Findings
 
-Our results indicate that *hallucination-related signals are present and extractable from the model's internal representations*. The consistent 91% AUC across all configurations demonstrates that hallucination-relevant information is encoded in the model's internal representations and can be retrieved using lightweight probes. This finding supports the hypothesis that the model maintains, at least implicitly, some representation of the reliability of its own outputs.
+Our results confirm that *hallucination-related signals are present and extractable from the model's internal representations*, consistent with prior work. The consistent 91% AUC across configurations demonstrates that this information can be retrieved using lightweight probes, without requiring external knowledge bases or additional inference passes.
 
 Equally notable is that *these signals seem to be "localized", not distributed*. Indeed, performance does not improve with additional layers: the hallucination-related signal appears concentrated in specific mid-layers (particularly layer 16) rather than spread across the network. This concentration has practical implications: a single layer's activations suffice for detection, minimizing extraction overhead.
 
 Moreover, attention features - both per-head statistics and MHA outputs - added no value beyond what FFN activations already provided. The discriminative information appears to reside primarily in the feed-forward pathway, suggesting that attention patterns, at least as summarized by our chosen statistics, do not capture complementary hallucination-relevant signals.
 
-Finally, all configurations converge to similar performance bounds: approximately 75% F1, 83-84% accuracy, and 91% AUC. This ceiling may reflect fundamental limits to what can be extracted via mean-pooled representations, noise in the dataset labels, or both.
+Finally, all configurations converge to similar performance bounds: approximately 75% F1, 83-84% accuracy, and 91% AUC. These results are comparable to prior work (Azaria & Mitchell report 71-83% accuracy; Ji et al. report 84.32%), suggesting we are approaching the practical ceiling for this general approach. This ceiling may reflect fundamental limits of mean-pooled representations, noise in dataset labels, or inherent ambiguity in what constitutes a "hallucination".
 
 
 #### 5.2. Limitations and Future Directions
@@ -150,32 +154,17 @@ Two directions could help clarify the source of the observed performance ceiling
 
 ## 6. Conclusion
 
-This study demonstrates that hallucination-related signals are present and extractable from transformer internal representations using lightweight classical probes. A single mid-layer's mean-pooled activations suffice to achieve 83% accuracy, 91% AUC and 75% F1 score, suggesting that the model encodes, at least implicitly, information about the reliability of its own outputs. While the observed performance ceiling leaves room for improvement, these findings provide a foundation for real-time, low-overhead hallucination detection and offer interpretability insights into how factual grounding may be represented within language models.
+This study confirms that hallucination-related signals are present and extractable from transformer internal representations using lightweight classical probes, replicating prior findings at larger scale and with alternative methodological choices. A single mid-layer's mean-pooled activations suffice to achieve 84% accuracy, 91% AUC, and 75% F1 score. While the observed performance ceiling leaves room for improvement, these findings reinforce the viability of real-time, low-overhead hallucination detection and offer additional data points on how factual grounding may be represented within language models.
+
+## References
+
+- Azaria, A., & Mitchell, T. (2023). [The Internal State of an LLM Knows When It's Lying](https://arxiv.org/pdf/2304.13734). *Findings of EMNLP 2023*.
+- Chen, C., et al. (2024). [INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection](https://arxiv.org/pdf/2402.03744). *ICLR 2024*.
+- Ji, Z., et al. (2024). [LLM Internal States Reveal Hallucination Risk Faced With a Query](https://arxiv.org/abs/2407.03282). *BlackboxNLP Workshop 2024*.
+- Sriramanan, G., et al. (2024). [LLM-Check: Investigating Detection of Hallucinations in Large Language Models](https://openreview.net/pdf?id=LYx4w3CAgy). *NeurIPS 2024*.
 
 ## Resources
 
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
