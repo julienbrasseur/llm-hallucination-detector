@@ -12,7 +12,7 @@
 
 Large language models occasionally generate plausible-sounding but factually incorrect content, a phenomenon commonly referred to as "hallucination". Current detection methods typically rely on external knowledge retrieval, self-consistency checks, or secondary judge models, each incurring significant computational overhead or introducing additional points of failure.
 
-An alternative approach, explored in recent work, is to extract hallucination-related signals directly from the model's internal representations. Azaria & Mitchell (2023) demonstrated that classifiers trained on hidden states can detect statement truthfulness with 71-83% accuracy. Ji et al. (2024) extended this to pre-generation risk estimation, while other work has explored eigenvalue-based consistency metrics (Chen et al., 2024) and attention-based probing (Sriramanan et al., 2024).
+An alternative approach, explored in recent work, is to extract hallucination-related signals directly from the model's internal representations. Azaria & Mitchell (2023) demonstrated that classifiers trained on hidden states can detect statement truthfulness with 71-83% accuracy. Ji *et al.* (2024) extended this to pre-generation risk estimation, while other work has explored eigenvalue-based consistency metrics (Chen *et al.*, 2024) and attention-based probing (Sriramanan *et al.*, 2024).
 
 This study replicates and extends these findings using a different model, a larger dataset, and alternative methodological choices. Specifically, we use mean-pooled activations (rather than single-token extraction), XGBoost classifiers (rather than MLP probes), and a dataset of 145K examples spanning multiple domains.
 
@@ -81,7 +81,7 @@ The layer selection analysis revealed that mid-layers are most expressive for ha
 
 This pattern admits an intuitive interpretation: early layers (1-10) encode primarily syntactic and surface-level features, while late layers (25-36) may be optimized for generation rather than factual grounding. Mid-layers appear to capture semantic representations where hallucination-relevant signals are most accessible.
 
-*Remark:* This mid-layer concentration aligns with Azaria & Mitchell (2023), who also found middle layers most predictive when probing true/false statements. Note, however, that Ji et al. (2024) reported deeper layers as optimal when probing queries to predict hallucination risk before generation. This discrepancy may reflect a genuine difference between pre-generation uncertainty signals (encoded in query representations) and post-generation reliability signals (encoded in response representations).
+*Remark:* This mid-layer concentration aligns with Azaria & Mitchell (2023), who also found middle layers most predictive when probing true/false statements. Note, however, that Ji *et al.* (2024) reported deeper layers as optimal when probing queries to predict hallucination risk before generation. This discrepancy may reflect a genuine difference between pre-generation uncertainty signals (encoded in query representations) and post-generation reliability signals (encoded in response representations).
 
 #### 4.2. Single-Layer Results
 
@@ -135,7 +135,7 @@ Equally notable is that *these signals seem to be "localized", not distributed*.
 
 Moreover, attention features - both per-head statistics and MHA outputs - added no value beyond what FFN activations already provided. The discriminative information appears to reside primarily in the feed-forward pathway, suggesting that attention patterns, at least as summarized by our chosen statistics, do not capture complementary hallucination-relevant signals.
 
-Finally, all configurations converge to similar performance bounds: approximately 75% F1, 83-84% accuracy, and 91% AUC. These results are comparable to prior work (Azaria & Mitchell report 71-83% accuracy; Ji et al. report 84.32%), suggesting we are approaching the practical ceiling for this general approach. This ceiling may reflect fundamental limits of mean-pooled representations, noise in dataset labels, or inherent ambiguity in what constitutes a "hallucination".
+Finally, all configurations converge to similar performance bounds: approximately 75% F1, 83-84% accuracy, and 91% AUC. These results are comparable to prior work (Azaria & Mitchell report 71-83% accuracy; Ji *et al.* report 84.32%), suggesting we are approaching the practical ceiling for this general approach. This ceiling may reflect fundamental limits of mean-pooled representations, noise in dataset labels, or inherent ambiguity in what constitutes a "hallucination".
 
 
 #### 5.2. Limitations and Future Directions
@@ -159,12 +159,13 @@ This study confirms that hallucination-related signals are present and extractab
 ## References
 
 - Azaria, A., & Mitchell, T. (2023). [The Internal State of an LLM Knows When It's Lying](https://arxiv.org/pdf/2304.13734). *Findings of EMNLP 2023*.
-- Chen, C., et al. (2024). [INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection](https://arxiv.org/pdf/2402.03744). *ICLR 2024*.
-- Ji, Z., et al. (2024). [LLM Internal States Reveal Hallucination Risk Faced With a Query](https://arxiv.org/abs/2407.03282). *BlackboxNLP Workshop 2024*.
-- Sriramanan, G., et al. (2024). [LLM-Check: Investigating Detection of Hallucinations in Large Language Models](https://openreview.net/pdf?id=LYx4w3CAgy). *NeurIPS 2024*.
+- Chen, C., *et al.* (2024). [INSIDE: LLMs' Internal States Retain the Power of Hallucination Detection](https://arxiv.org/pdf/2402.03744). *ICLR 2024*.
+- Ji, Z., *et al.* (2024). [LLM Internal States Reveal Hallucination Risk Faced With a Query](https://arxiv.org/abs/2407.03282). *BlackboxNLP Workshop 2024*.
+- Sriramanan, G., *et al.* (2024). [LLM-Check: Investigating Detection of Hallucinations in Large Language Models](https://openreview.net/pdf?id=LYx4w3CAgy). *NeurIPS 2024*.
 
 ## Resources
 
 - **Dataset:** [krogoldAI/hallucination-labeled-dataset](https://huggingface.co/datasets/krogoldAI/hallucination-labeled-dataset)
 - **Code:** [llmscan library](https://github.com/julienbrasseur/llm-hallucination-detector)
 - **Model:** [Ministral-8B-Instruct-2410](https://huggingface.co/mistralai/Ministral-8B-Instruct-2410)
+
