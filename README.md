@@ -178,6 +178,8 @@ Note that `head_output_norm` and `attn_value_correlation` have not yet been impl
 
 ### Probe training
 
+#### Classification probe (XGBoost)
+
 Training XGBoost probes on activation or attention layers can be done using the `XGBoostProbe` class. The whole process, from training to evaluation, requires train, validation and test splits.
 
 ```py
@@ -218,6 +220,47 @@ probe.save("probe.pkl")
 ```
 
 Note that inputs must have `numpy` types. If labels are not already in `numpy` format, they will be automatically converted.
+
+#### Sequence-aware probe (TCN)
+
+While mean-pooled probes collapse a variable-length activation sequence into a single vector, some signals may be encoded in the *temporal dynamics* of per-token representations (i.e., how activations evolve across the generated sequence). This is analogous to video classification, where per-frame features must be aggregated into a sequence-level prediction. The temporal order and local patterns carry information that a simple average discards.
+
+`TCNProbe` applies a Temporal Convolutional Network to the full sequence of per-token activations at a given layer. It operates on raw (non-pooled) activations extracted with `per_example=True`, preserving token order and variable sequence lengths.
+
+```py
+from llmscan import TCNProbe
+import glob
+
+# Load per-example activations (extracted with per_example=True)
+X_train = TCNProbe.load_shards(sorted(glob.glob("./shards_train/*.pt")))
+X_val = TCNProbe.load_shards(sorted(glob.glob("./shards_val/*.pt")))
+X_test = TCNProbe.load_shards(sorted(glob.glob("./shards_test/*.pt")))
+
+# Initialize and train
+probe = TCNProbe(
+    input_dim=4096,       # hidden dimension of the target model
+    proj_dim=256,         # learned projection before convolutions
+    n_filters=128,        # channels per conv layer
+    kernel_size=3,
+    dilations=[1, 2, 4, 8],
+    max_seq_len=80,       # truncate sequences beyond this length
+    projection="linear",  # or "pca"
+    pooling="avg",        # or "max", "avg+max"
+)
+probe.fit(X_train, train_labels, X_val=X_val, y_val=val_labels)
+
+# Evaluate
+probs = probe.predict_proba(X_test)
+preds = probe.predict(X_test)
+
+# Save
+probe.save("tcn_probe.pt")
+
+# Load
+loaded = TCNProbe.load("tcn_probe.pt")
+```
+
+All architecture and training parameters are configurable at initialization (see `TCNProbe` docstring for the full list). The probe handles variable-length sequences internally via per-batch GPU padding and mixed-precision training.
 
 ## License
 
