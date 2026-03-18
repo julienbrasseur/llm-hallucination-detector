@@ -2,7 +2,13 @@
 
 **llmscan** is a lightweight library for extracting and analyzing LLM internal representations. It was developed for a hallucination detection research project, the idea of which is akin to medical brain imaging: rather than interrogating a model through dialogue (as with a judge LLM), we directly observe its internal activation patterns, much like a PET scan reveals cognitive processes without requiring the subject to speak.
 
-*Note:* Currently, the library is optimized for models using the end instruction token `[/INST]` in their default chat template, which includes all Mistral models and early Llama models. This limitation will be addressed in a future release.
+---
+
+**[2026-03-18] New features**
+
+- *Model-agnostic assistant masking:* All Hugging Face chat models are now supported out of the box (no hardcoded Mistral-specific delimiters). The extractor auto-detects assistant token boundaries from the model's native chat template (via response template matching, with fallback strategies for edge cases). The selected strategy is reported at initialization.
+- *Per-example activation shards:* `extract_to_shards` now accepts a `per_example=True` flag, which preserves per-example token boundaries in the output shards (stored as a list of variable-length tensors + a lengths metadata tensor). This is required for sequence-aware probes that operate on raw, non-pooled activations. The default (`per_example=False`) retains the original flat-concatenation format, suitable for training on individual token vectors (e.g., sparse autoencoders).
+- *TCN probe:* `TCNProbe` provides a temporal convolutional network for hallucination detection on per-token activation sequences, with an sklearn-style API (`.fit()`, `.predict()`, `.predict_proba()`, `.save()`, `.load()`). Configurable projection, architecture, pooling, and training parameters. (See `tcn.py` for details.)
 
 ---
 
