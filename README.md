@@ -93,11 +93,12 @@ extractor.extract_to_shards(
     out_dir="./shards",
     shard_size_tokens=100_000,
     focus_on_assistant=True,
+    per_example=True,
     mean_pool=False
 )
 ```
 
-*Remark:* The `focus_on_assistant` parameter restricts extraction to the last assistant answer exclusively, by masking all preceding tokens. This is being done by identifying the last occurence of the end-instruction token `[/INST]`.
+*Remark:* The `focus_on_assistant` parameter restricts extraction to the last assistant answer exclusively, by masking all preceding tokens. The assistant token boundaries are detected automatically from the model's chat template (see initialization log for the selected masking strategy).
 
 ### Attention extraction
 
