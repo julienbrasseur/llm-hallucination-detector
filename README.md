@@ -267,6 +267,44 @@ loaded = TCNProbe.load("tcn_probe.pt")
 
 All architecture and training parameters are configurable at initialization (see `TCNProbe` docstring for the full list). The probe handles variable-length sequences internally via per-batch GPU padding and mixed-precision training.
 
+#### Sequence-aware probe (Attention Probe)
+
+Where the TCN captures local temporal patterns via convolutions, the `AttentionProbe` takes a complementary approach: it learns *which positions matter most* via multi-head attention. Each head computes a scalar attention weight per position (token or layer), with an ALiBi-style position bias, and aggregates through a learned value projection. The query projection is initialized to zero, so the probe starts as an equivalent of a uniform mean probe and learns to deviate from it during training.
+
+This is particularly useful for cross-layer probing, where the "sequence" is a stack of per-layer representations and the goal is to discover which layers carry the most signal.
+
+```py
+from llmscan import (
+    AttentionProbe,
+    train_attention_probe,
+    evaluate_attention_probe,
+    inspect_layer_attention,
+)
+
+# Cross-layer activations: (n_examples, n_layers, hidden_dim)
+# e.g., mean-pooled activations at layers 10–26
+
+model = train_attention_probe(
+    X_train, train_labels,
+    X_val, val_labels,
+    hidden_dim=4096,
+    n_heads=8,
+    lr=1e-3,
+    weight_decay=0.01,
+    epochs=100,
+    batch_size=256,
+    patience=10,
+)
+
+# Evaluate on test set
+probs, auc, threshold = evaluate_attention_probe(model, X_test, test_labels)
+
+# Get learned layer importance
+inspect_layer_attention(model, X_val, layer_indices=list(range(10, 27)))
+```
+
+The probe architecture is lightweight (~65K parameters for 8 heads on 4096-dim input) and trains in seconds per epoch. Inspired by [EleutherAI's attention probe](https://github.com/EleutherAI/attention-probes) architecture, reimplemented here as a standalone module with no external dependencies beyond PyTorch.
+
 ## License
 
 This project is licensed under the terms of the [MIT license](LICENSE).
