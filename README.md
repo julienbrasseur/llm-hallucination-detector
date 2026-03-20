@@ -275,7 +275,6 @@ This is particularly useful for cross-layer probing, where the "sequence" is a s
 
 ```py
 from llmscan import (
-    AttentionProbe,
     train_attention_probe,
     evaluate_attention_probe,
     inspect_layer_attention,
