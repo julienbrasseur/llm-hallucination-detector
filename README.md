@@ -4,6 +4,11 @@
 
 ---
 
+**[2026-03-20] New features**
+
+- *Cross-layer last-token extraction:* `extract_last_token` extracts the hidden state of the final non-padding token (typically EOS) at each target layer, returning a tensor of shape `(n_examples, n_layers, hidden_dim)`. Designed for cross-layer probing, where the layer axis becomes the sequence dimension for downstream probes (TCN, attention probe, or flattened for XGBoost). Supports runtime layer override via the `layers` parameter without re-initializing the extractor.
+- *Attention probe:* `AttentionProbe` implements a multi-head learned attention mechanism over activation sequences (e.g., cross-layer representations), inspired by [EleutherAI](https://github.com/EleutherAI/attention-probes)'s attention probe architecture. Each head learns which positions (tokens or layers) carry the most signal via a query projection with ALiBi-style position bias, initialized to uniform weighting (equivalent to a mean probe at initialization). Includes `inspect_layer_attention` for visualizing learned attention weights, to better identify which layers the probe deems most informative. (See `attention_probe.py` for details.)
+
 **[2026-03-18] New features**
 
 - *Model-agnostic assistant masking:* All Hugging Face chat models are now supported out of the box (no hardcoded Mistral-specific delimiters). The extractor auto-detects assistant token boundaries from the model's native chat template (via response template matching, with fallback strategies for edge cases). The selected strategy is reported at initialization.
