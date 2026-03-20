@@ -490,6 +490,84 @@ class ActivationExtractor:
         else:
             return all_acts
 
+    def extract_last_token(
+        self,
+        raw_texts: List[Union[Dict[str, Any], str]],
+        batch_size: int = 8,
+        max_length: int = 1024,
+        layers: Optional[List[int]] = None,
+    ) -> torch.Tensor:
+        """Extract the last non-padding token's hidden state at each layer.
+
+        This is designed for cross-layer probing: rather than extracting
+        many tokens at one layer, we extract one token (the EOS / final
+        assistant token) across multiple layers.  The resulting tensor
+        treats layers as the sequence axis, enabling TCN or other
+        sequential probes over the model's depth.
+
+        Args:
+            raw_texts: list of conversation dicts or raw strings.
+            batch_size: inference batch size.
+            max_length: max tokenization length.
+            layers: layer indices to extract. If None, uses
+                self.target_layers. For full cross-layer probing,
+                pass e.g. list(range(36)).
+
+        Returns:
+            Tensor of shape (n_examples, n_layers, hidden_dim).
+        """
+        layers = layers or self.target_layers
+        all_acts = []
+
+        for i in tqdm(
+            range(0, len(raw_texts), batch_size),
+            desc="Extracting (last token)",
+        ):
+            batch_items = raw_texts[i : i + batch_size]
+            texts = [self._format_conversation(x) for x in batch_items]
+            inputs = self.tokenizer(
+                texts,
+                return_tensors="pt",
+                padding=True,
+                truncation=True,
+                max_length=max_length,
+            ).to(self.device)
+
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+
+            hidden_states = outputs.hidden_states
+
+            # Last non-padding position per example: sum attention_mask - 1
+            # attention_mask shape: (batch, seq_len)
+            last_pos = inputs["attention_mask"].sum(dim=1) - 1  # (batch,)
+
+            # Stack target layers: (batch, n_layers, seq_len, hidden)
+            stacked = torch.stack(
+                [hidden_states[l] for l in layers], dim=1
+            )
+
+            # Gather the last-token activation at each layer
+            # last_pos needs shape (batch, n_layers, 1, hidden) for gather
+            batch_sz = stacked.size(0)
+            hidden_dim = stacked.size(-1)
+            n_layers = len(layers)
+
+            idx = (
+                last_pos
+                .view(batch_sz, 1, 1, 1)
+                .expand(batch_sz, n_layers, 1, hidden_dim)
+            )
+            # gather along seq_len axis (dim=2), then squeeze it
+            batch_acts = stacked.gather(dim=2, index=idx).squeeze(2)  # (batch, n_layers, hidden)
+
+            all_acts.append(batch_acts.cpu())
+
+            del outputs
+            torch.cuda.empty_cache()
+
+        return torch.cat(all_acts, dim=0)
+
     def extract_to_shards(
         self,
         raw_texts: List[Union[Dict[str, Any], str]],
